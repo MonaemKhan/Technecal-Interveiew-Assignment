@@ -102,7 +102,7 @@
             [(ngModel)]="appStatus"
             (change)="onChangeEvent($event)"
           >
-            <option value="" disabled>Select doctor</option>
+            <option value="">Select doctor</option>
             <option *ngFor="let d of doctors" [value]="d.id">
               {{ d.name }}
             </option>
