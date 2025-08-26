@@ -13,20 +13,26 @@ namespace Medical_Appoinment_System_API.Controllers
     public class EmailController : ControllerBase
     {
         private readonly AppDbContext _dbContext;
-        public EmailController(AppDbContext dbContext)
+        private readonly IConfiguration _configuration;
+        public EmailController(AppDbContext dbContext,IConfiguration configuration)
         {
             _dbContext = dbContext;
+            _configuration = configuration;
         }
         [HttpGet("send")]
         public async Task<IActionResult> SendEmail([FromQuery] string EmailAddress , string appointmentNo)
         {
             try
             {
-				// smtp.office365.com
-                var smtpClient = new SmtpClient("server name")
+                var server = _configuration["EmailSettings:Server"];
+                var port = _configuration["EmailSettings:Port"];
+                var fromMail = _configuration["EmailSettings:FromMail"];
+                var password = _configuration["EmailSettings:Password"];
+
+                var smtpClient = new SmtpClient(server)
                 {
-                    Port = 587,
-                    Credentials = new NetworkCredential("Mail", "Password"),
+                    Port = Convert.ToInt32(port),
+                    Credentials = new NetworkCredential(fromMail, password),
                     EnableSsl = true,
                 };
                 var appointment = await _dbContext.Appointments.FirstOrDefaultAsync(x => x.AppointmentNo == appointmentNo);
@@ -52,7 +58,7 @@ namespace Medical_Appoinment_System_API.Controllers
 
                     var mailMessage = new MailMessage
                     {
-                        From = new MailAddress("Mail"),
+                        From = new MailAddress(fromMail),
                         Subject = subject,
                         Body = body,
                         IsBodyHtml = true, // if you want HTML body

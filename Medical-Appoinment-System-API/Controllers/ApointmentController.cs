@@ -318,6 +318,54 @@ namespace Medical_Appoinment_System_API.Controllers
             Cell1 = sheet.Cells[8, 2];
             Cell1.PutValue(apoinment!.VisitType);
 
+            var prescriptionDto = _dbContext.Prescribtions.Where(x => x.AppointmentNo == appointmentNo).ToList();
+            if (prescriptionDto.Count>0)
+            {
+                string[] columns = { "Medicine", "Dosage", "Start Date", "End Date" };
+
+                Style colHeaderStyle = workbook.CreateStyle();
+                colHeaderStyle.Font.IsBold = true;
+                colHeaderStyle.Font.Color = Color.White;
+                colHeaderStyle.ForegroundColor = Color.Gray;
+                colHeaderStyle.Pattern = BackgroundType.Solid;
+                colHeaderStyle.HorizontalAlignment = TextAlignmentType.Center;
+                colHeaderStyle.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+                colHeaderStyle.Borders[BorderType.BottomBorder].Color = Color.Black;
+
+                for (int i = 0; i < columns.Length; i++)
+                {
+                    Cell c = sheet.Cells[9, i];
+                    c.PutValue(columns[i]);
+                    c.SetStyle(colHeaderStyle);
+                }
+
+
+                Style dataStyle = workbook.CreateStyle();
+                dataStyle.Borders[BorderType.BottomBorder].LineStyle = CellBorderType.Thin;
+                dataStyle.Borders[BorderType.BottomBorder].Color = Color.LightGray;
+                dataStyle.HorizontalAlignment = TextAlignmentType.Center;
+
+                int rowIndex = 10;
+                foreach (var item in prescriptionDto)
+                {
+                    var med = await _dbContext.Medicines.FirstOrDefaultAsync(x => x.Id == item.MedicineId);
+                    sheet.Cells[rowIndex, 0].PutValue(med!.Name);
+                    sheet.Cells[rowIndex, 1].PutValue(item.Dogaes);
+                    sheet.Cells[rowIndex, 2].PutValue(Convert.ToDateTime(item.StartDate).ToString("dd-MMM-yyyy"));
+                    sheet.Cells[rowIndex, 3].PutValue(Convert.ToDateTime(item.EndDate).ToString("dd-MMM-yyyy"));
+
+                    for (int i = 0; i < columns.Length; i++)
+                        sheet.Cells[rowIndex, i].SetStyle(dataStyle);
+
+                    rowIndex++;
+                }
+
+                sheet.PageSetup.Orientation = PageOrientationType.Portrait;
+                sheet.PageSetup.PaperSize = PaperSizeType.PaperA4;
+                sheet.PageSetup.CenterHorizontally = true;
+                sheet.PageSetup.CenterVertically = false;
+            }
+
             sheet.AutoFitColumns();
 
             string fullPath = Path.Combine("..", "Reports");
