@@ -1,0 +1,68 @@
+<app-header></app-header>
+<main class="container">
+  <form [formGroup]="prescriptionForm" class="card">
+    <h2>Patient Prescription</h2>
+
+    <div class="rx-toolbar">
+      <button type="button" class="add-btn" (click)="addPrescription()">
+        Add Prescribtion Row
+      </button>
+      <label>
+        Appointment List
+        <select formControlName="apointmentId">
+          <option [ngValue]="">-- Select Appointment --</option>
+          <option *ngFor="let p of appointmentList" [value]="p.appointmentNo">
+            {{ p.display }}
+          </option>
+        </select>
+      </label>
+    </div>
+
+    <div class="rx-table-wrap">
+      <table class="rx-table">
+        <thead>
+          <tr>
+            <th class="col-med">Medicine</th>
+            <th class="col-dos">Dosage</th>
+            <th class="col-date">Start Date</th>
+            <th class="col-date">End Date</th>
+            <th class="col-notes">Notes</th>
+            <th class="col-act">Action</th>
+          </tr>
+        </thead>
+        <tbody formArrayName="prescriptions">
+          <tr
+            *ngFor="let p of prescriptions.controls; let i = index"
+            [formGroupName]="i"
+          >
+            <td>
+              <select formControlName="medicineId">
+                <option value="" disabled>Select Medicine</option>
+                <option *ngFor="let m of medicines" [value]="m.id">
+                  {{ m.name }}
+                </option>
+              </select>
+            </td>
+            <td><input type="text" formControlName="dosage" /></td>
+            <td><input type="date" formControlName="startDate" /></td>
+            <td><input type="date" formControlName="endDate" /></td>
+            <td><input type="text" formControlName="notes" /></td>
+            <td>
+              <button
+                type="button"
+                class="delete-btn"
+                (click)="removePrescription(i)"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rx-actions">
+      <button type="button" class="save-btn" (click)="save()">Save</button>
+    </div>
+  </form>
+</main>
